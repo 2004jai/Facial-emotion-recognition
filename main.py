@@ -1,45 +1,21 @@
 import os
-import subprocess
 import threading
-import time
-import webbrowser
+import streamlit as st
+from flask import Flask, request, jsonify
 
-def start_flask_server():
-    """Start the Flask API server in a separate process."""
-    print("Starting Flask API server...")
-    subprocess.run(["python", "flask.py"])
+# Initialize Flask
+app = Flask(__name__)
 
-def start_streamlit_app():
-    """Start the Streamlit app in a separate process."""
-    print("Starting Streamlit app...")
-    subprocess.run(["streamlit", "run", "web.py"])
+@app.route("/")
+def home():
+    return jsonify({"message": "Flask API is running!"})
 
-def main():
-    """Main function to start both servers."""
-    print("Starting Emotion Detection Web Application")
-    
-    # Check if required files exist
-    required_files = ["face_landmarks.dat", "emotion.h5"]
-    missing_files = [file for file in required_files if not os.path.exists(file)]
-    
-    if missing_files:
-        print("Error: The following required files are missing:")
-        for file in missing_files:
-            print(f"  - {file}")
-        print("\nPlease download these files before running the application.")
-        return
-    
-    # Start Flask server in a separate thread
-    flask_thread = threading.Thread(target=start_flask_server)
-    flask_thread.daemon = True
-    flask_thread.start()
-    
-    # Wait for Flask server to start
-    print("Waiting for Flask server to start...")
-    time.sleep(5)
-    
-    # Start Streamlit app
-    start_streamlit_app()
+# Function to run Streamlit
+def run_streamlit():
+    os.system("streamlit run main.py --server.port 8501 --server.address 0.0.0.0")
+
+# Run Streamlit in a separate thread
+threading.Thread(target=run_streamlit, daemon=True).start()
 
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", port=5000, debug=True)
